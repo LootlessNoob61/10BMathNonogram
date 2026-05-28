@@ -51,6 +51,15 @@
       margin-top: 30px;
     }
 
+    /* Updated Scroll Container: Added horizontal padding to protect the matrix edges */
+    .game-scroll-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      padding: 15px 25px; /* Added padding on each side horizontally */
+      box-sizing: border-box;
+      -webkit-overflow-scrolling: touch;
+    }
+
     /* Nonogram Board Layout */
     .board-container {
       display: inline-grid;
@@ -64,8 +73,8 @@
     }
 
     .col-clues {
-      display: flex;
-      justify-content: space-around;
+      display: grid;
+      gap: 3px;
       padding-bottom: 10px;
     }
 
@@ -74,29 +83,34 @@
       flex-direction: column;
       justify-content: flex-end;
       align-items: center;
-      width: 40px;
+      width: 40px; /* Locked width to perfectly match cell widths */
       font-size: 14px;
+      line-height: 1.3;
       color: var(--cyan);
       font-weight: bold;
     }
 
+    /* Updated Row Clues Container */
     .row-clues {
       display: flex;
       flex-direction: column;
       justify-content: space-around;
-      padding-right: 10px;
+      padding-right: 15px;
       text-align: right;
     }
 
+    /* Updated Row Clue Box: Extended width explicitly to protect space for numbers */
     .row-clue-box {
       height: 40px;
+      min-width: 14ch; /* Guarantees space for about 14 characters horizontally on the side */
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      gap: 5px;
+      gap: 6px;
       font-size: 14px;
       color: var(--cyan);
       font-weight: bold;
+      white-space: nowrap; /* Prevents long number lines from dropping to a second line */
     }
 
     .grid {
@@ -114,6 +128,7 @@
       border: 1px solid rgba(0, 240, 255, 0.1);
       cursor: pointer;
       transition: all 0.2s ease;
+      box-sizing: border-box;
     }
 
     .cell:hover {
@@ -138,11 +153,13 @@
     <h2 id="level-title">Level 1: 3x3 Grid</h2>
     <p style="color: var(--pink)">System Timer: <span id="time">0</span>s</p>
     
-    <div class="board-container">
-      <div class="corner"></div>
-      <div id="col-clues" class="col-clues"></div>
-      <div id="row-clues" class="row-clues"></div>
-      <div id="grid" class="grid"></div>
+    <div class="game-scroll-wrapper">
+      <div class="board-container">
+        <div class="corner"></div>
+        <div id="col-clues" class="col-clues"></div>
+        <div id="row-clues" class="row-clues"></div>
+        <div id="grid" class="grid"></div>
+      </div>
     </div>
     <br>
     <button onclick="nextLevel()" style="margin-top:25px;">Skip level</button>
@@ -154,7 +171,6 @@
     let currentLevel = 3;
     let playerName = "";
 
-    // The game "brain": Clues and Solutions combined
     const gameData = {
       3: { 
         rows: [[1, 1], [1], [3]], 
@@ -219,6 +235,8 @@
       colCluesContainer.innerHTML = "";
 
       grid.style.gridTemplateColumns = `repeat(${size}, 40px)`;
+      colCluesContainer.style.gridTemplateColumns = `repeat(${size}, 40px)`;
+
       const levelData = gameData[size];
 
       for (let i = 0; i < size; i++) {
@@ -238,13 +256,12 @@
           let cell = document.createElement("div");
           cell.className = "cell";
           
-          // Tags the cell with its coordinates
           cell.setAttribute("data-row", i);
           cell.setAttribute("data-col", j);
           
           cell.onclick = () => {
             cell.classList.toggle("filled");
-            validateBoard(); // Checks for a win every time you click
+            validateBoard();
           };
           
           grid.appendChild(cell);
